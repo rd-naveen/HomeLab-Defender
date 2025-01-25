@@ -4,6 +4,7 @@ echo "Updating the apt respository and system packages"
 sudo apt update -y
 sudo apt upgrade -y
 
+sudo apt install net-tools -y
 echo "Installing avahi-daemon package"
 sudo apt install avahi-daemon -y
 
