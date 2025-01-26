@@ -147,4 +147,5 @@ createandconfigurevm -vmname "Lab-Ubuntu-Sensor"  -category "linux"  -isofileloc
 
 
 # TODO:
-    # make the ubuntu server to listen all the traffic comming and going from all VMs, inside the Corp Lan network.
+    # [-] make the ubuntu server to listen all the traffic comming and going from all VMs, inside the Corp Lan network.
+    # [-] Make a snapshot of all the VMs with basic configurations
