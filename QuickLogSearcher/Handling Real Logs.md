@@ -6,7 +6,8 @@ Source logs
 
 
 
-    Send Windows Etw logs to Kusto (Get-WinEvent -LogName "Security" -MaxEvents 100 | ConvertTo-Json > windows-security-event.json) 
+    Send Windows Etw logs to Kusto (Get-WinEvent -LogName "Security" -MaxEvents 100 | ConvertTo-Json > windows-security-event.json)
+    
     - get sample events from the windows security events
         Get-WinEvent -LogName "Security" -MaxEvents 100 | ConvertTo-Json > windows-events-samples.json
 
@@ -19,6 +20,8 @@ Source logs
 
 
     - We can use the eric Zimmerman tools EvtxECmd.exe to covert the logs into json format, (it looks like in the JSONL, validated using https://jsonlines.org/validator/)
+
+        EvtxECmd.exe -f "C:\Temp\Application.evtx" --jsonf "c:\temp\20250524075444_EvtxECmd_Output.json"
 
         now we need to inject the logs to Kusto env, The ideas here is that, we will map the know fields(which are common across all logs types, into the table and for the other fields we will preserve the raw data in the separate col. so if required we can create new colums when needed)
         
