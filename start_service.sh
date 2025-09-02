@@ -1,8 +1,8 @@
-sudo -u root ./zeekctl start
-sudo -u root ./zeekctl status
-
+sudo /opt/zeek/bin/zeekctl start
 sudo service suricata start
-sudo service suricata status
+sudo service opensearch start
+sudo service opensearch-dashboards start
 
-sudo systemctl start opensearch
-sudo systemctl status opensearch
+
+/var/lib/suricata/rules
+suricata.rules

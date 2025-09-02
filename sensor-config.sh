@@ -1,7 +1,7 @@
 #!/bin/bash
-monitoring_interface="eth1"
+monitoring_interface="eth0"
 servername=`hostname`
-read -p "Enter fullname: "  user_password_opensearch
+read -p "Enter password: "  user_password_opensearch
 
 echo "Set the sudo root password"
 sudo passwd root
@@ -64,6 +64,8 @@ sudo apt install suricata -y
 sudo service suricata start
 
 echo "[Suricata] Suricata first time setup"
+#TODO need to identify the interface on which the sensor should listen.
+
 sudo sed -i -e "s/community-id: false/community-id: true/g" /etc/suricata/suricata.yaml
 sudo sed -i -e "s/- interface: eth0/- interface: $monitoring_interface/g" /etc/suricata/suricata.yaml
 sudo sed -i -e "s/- rule-reload: true/- rule-reload: true/g" /etc/suricata/suricata.yaml
@@ -109,10 +111,10 @@ sudo service suricata restart
 # uid=0(root) gid=0(root) groups=0(root)
 
 # view the logs
-# grep 2100498 /var/log/suricata/fast.log
+# sudo grep 2100498 /var/log/suricata/fast.log
 
 # or
-# jq 'select(.alert .signature_id==2100498)' /var/log/suricata/eve.json
+# sudo jq 'select(.alert .signature_id==2100498)' /var/log/suricata/eve.json
 
 
 echo "[Suricata] Installation finished"
@@ -173,7 +175,7 @@ sudo apt-get install cmake make gcc g++ flex libfl-dev bison libpcap-dev libssl-
 echo 'deb http://download.opensuse.org/repositories/security:/zeek/xUbuntu_24.04/ /' | sudo tee /etc/apt/sources.list.d/security:zeek.list
 curl -fsSL https://download.opensuse.org/repositories/security:zeek/xUbuntu_24.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/security_zeek.gpg > /dev/null
 sudo apt update
-sudo apt install zeek
+sudo apt install zeek -y
 
 
 echo "[Zeek] Configuration Started"
@@ -206,13 +208,16 @@ sudo systemctl start opensearch
 sudo systemctl status opensearch
 
 echo "[OpenSearch] Configuring OpenSearch"
-sudo sed -i -e "s/#network.host: 192.168.0.1/network.host: 0.0.0.0/g" /etc/opensearch/opensearch.yml
-sudo sed -i -e "s/#discovery.seed_hosts: [\"host1", "host2\"]/discovery.seed_hosts: [\"127.0.0.1\"]/g" /etc/opensearch/opensearch.yml
+sudo sed -i -e "s/#network.host: 192.168.0.1/network.host: $servername/g" /etc/opensearch/opensearch.yml
+sudo sed -i -e "s/#discovery.seed_hosts: [\"host1\", \"host2\"]/discovery.seed_hosts: [\"$servername\"]/g" /etc/opensearch/opensearch.
+yml
+sudo sed -i -e "s/#cluster.initial_cluster_manager_nodes: [\"host1\", \"host2\"]/cluster.initial_cluster_manager_nodes: [\"$servername\"]/g" /etc/opensearch/opensearch.
+yml
 
 echo "[OpenSearch] Testing OpenSearch"
-curl -X GET https://localhost:9200 -u 'admin:$user_password_opensearch' --insecure
+curl -X GET https://$servername:9200 -u 'admin:$user_password_opensearch' --insecure
 
-curl -X GET https://localhost:9200/_cat/plugins?v -u 'admin:$user_password_opensearch' --insecure
+curl -X GET https://$servername:9200/l -u 'admin:$user_password_opensearch' --insecure
 
 # # discovery.type: single-node
 # # plugins.security.disabled: false
@@ -238,7 +243,7 @@ sudo apt-get install opensearch-dashboards -y
 
 
 echo "[OpenSearch-Dashboard] Configuring Opensearch Dashboard"
-sudo sed -i -e "s/# server.host: \"localhost\"/server.host: 0.0.0.0/g" /etc/opensearch-dashboards/opensearch_dashboards.yml
+sudo sed -i -e "s/# server.host: \"localhost\"/server.host: $servername/g" /etc/opensearch-dashboards/opensearch_dashboards.yml
 sudo sed -i -e "s/# server.name: \"your-hostname\"/server.name: \"$servername\"/g" /etc/opensearch-dashboards/opensearch_dashboards.yml
 
 

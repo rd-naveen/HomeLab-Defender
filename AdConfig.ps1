@@ -26,7 +26,7 @@ Set-TimeZone -id "India Standard Time"
 Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
 Import-Module ADDSDeployment
 $domain_name="defender.local"
-Install-ADDSForest -DomainName $domain_name -InstallDNS
+Install-ADDSForest -DomainName $domain_name -InstallDNS -Force 
 
 # - Check how many interfaces are there
 (Get-NetAdapter).count
@@ -36,8 +36,9 @@ $interfaces_ = Get-NetIPAddress | Where-Object -Property InterfaceAlias -match E
 # assuming, we have connected the WAN adapter to default swith ( and assigned IP address through DHCP)
 $lan_interface = $interfaces_| Where-Object -Property SuffixOrigin -eq Link
 $wan_interface = $interfaces_| Where-Object -Property SuffixOrigin -eq Dhcp
-Write-host "Wan Interface Count "+$wan_interface.Count
-Write-host "Lan Interface Count "+$lan_interface.Count
+
+Write-Host $wan_interface.IPAddress, $wan_interface.SuffixOrigin, $wan_interface.InterfaceAlias
+Write-Host $lan_interface.IPAddress, $lan_interface.SuffixOrigin, $lan_interface.InterfaceAlias
 
 $choice=Read-Host "Do you want to swap: Y or N"	
 
@@ -49,25 +50,15 @@ if ($choice -eq "Y")
 }
 
 
-
-#join this machine to this AD
-$domain_name="defender.local"
-
-
-Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
-
-Import-Module ADDSDeployment
-Install-ADDSForest -DomainName $domain_name -InstallDNS
-# - install dns
 Install-WindowsFeature -Name DNS -IncludeManagementTools
-configure dns servers, 
+# configure dns servers, 
 # dns server name, 
 # forwarders, 
-	(Get-DnsServerForwarder).IPAddress.Count
-	Add-DnsServerForwarder -IPAddress 8.8.8.8
-	Add-DnsServerForwarder -IPAddress 1.1.1.1
+(Get-DnsServerForwarder).IPAddress.Count
+Add-DnsServerForwarder -IPAddress 8.8.8.8
+Add-DnsServerForwarder -IPAddress 1.1.1.1
 
-	(Get-DnsServerForwarder).IPAddress
+(Get-DnsServerForwarder).IPAddress
 # set which interface it should listen
 
 # - install dhcp
@@ -77,6 +68,8 @@ $dhcp_server_name = $server_name+"."+$domain_name
 
 Add-DhcpServerv4Scope -Name "Corp LAN" -StartRange 10.10.10.100 -EndRange 10.10.10.200 -SubnetMask 255.255.255.0
 
+ Install-WindowsFeature Routing -IncludeManagementTools -IncludeAllSubFeature
+Write-Host "User GUI to configure the routing"
 # - install gateway to forward the local traffic to internet
 # - Create dummy users with basic passwords
 # - install CS

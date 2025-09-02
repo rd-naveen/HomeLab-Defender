@@ -8,6 +8,8 @@ sudo apt install net-tools -y
 echo "Installing avahi-daemon package"
 sudo apt install avahi-daemon -y
 
+sudo apt install isc-dhcp-client -y
+
 echo "Configuring intefaces to respond mDNS message"
 interface_files=`ls /run/systemd/network`
 for interface_file in "${interface_files[@]}"
